@@ -10,42 +10,56 @@ namespace Acme.BookStore.Blazor.Menus;
 
 public class BookStoreMenuContributor : IMenuContributor
 {
-    public async Task ConfigureMenuAsync(MenuConfigurationContext context)
-    {
-        if (context.Menu.Name == StandardMenus.Main)
-        {
-            await ConfigureMainMenuAsync(context);
-        }
-    }
+	public async Task ConfigureMenuAsync(MenuConfigurationContext context)
+	{
+		if (context.Menu.Name == StandardMenus.Main)
+		{
+			await ConfigureMainMenuAsync(context);
+		}
+	}
 
-    private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
-    {
-        var administration = context.Menu.GetAdministration();
-        var l = context.GetLocalizer<BookStoreResource>();
+	private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+	{
+		var administration = context.Menu.GetAdministration();
+		var l = context.GetLocalizer<BookStoreResource>();
 
-        context.Menu.Items.Insert(
-            0,
-            new ApplicationMenuItem(
-                BookStoreMenus.Home,
-                l["Menu:Home"],
-                "/",
-                icon: "fas fa-home",
-                order: 0
-            )
-        );
+		context.Menu.Items.Insert(
+			0,
+			new ApplicationMenuItem(
+				BookStoreMenus.Home,
+				l["Menu:Home"],
+				"/",
+				icon: "fas fa-home",
+				order: 0
+			)
+		);
 
-        if (MultiTenancyConsts.IsEnabled)
-        {
-            administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 1);
-        }
-        else
-        {
-            administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
-        }
+		context.Menu.AddItem(
+			new ApplicationMenuItem(
+				"BooksStore",
+				l["Menu:BookStore"],
+				icon: "fa fa-book"
+			).AddItem(
+				new ApplicationMenuItem(
+					"BooksStore.Books",
+					l["Menu:Books"],
+					url: "/books"
+				)
+			)
+		);
 
-        administration.SetSubItemOrder(IdentityMenuNames.GroupName, 2);
-        administration.SetSubItemOrder(SettingManagementMenus.GroupName, 3);
+		if (MultiTenancyConsts.IsEnabled)
+		{
+			administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 1);
+		}
+		else
+		{
+			administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
+		}
 
-        return Task.CompletedTask;
-    }
+		administration.SetSubItemOrder(IdentityMenuNames.GroupName, 2);
+		administration.SetSubItemOrder(SettingManagementMenus.GroupName, 3);
+
+		return Task.CompletedTask;
+	}
 }
